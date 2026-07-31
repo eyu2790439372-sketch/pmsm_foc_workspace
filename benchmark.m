@@ -1,44 +1,57 @@
 % =========================================================================
-% 🚀 30-Day Project Benchmark & Comparison Suite
-% 作用：自动对比 Day 1 与 Day 30 的算法表现，并自动保存高清结果图
+% PMSM Sensorless FOC Performance Benchmark & Residual Alignment Suite
+% Target: Floating-Point Reference vs. Fixed-Point (Q-Format) C Engine
 % =========================================================================
 
 clc; clear; close all;
 
-% 1. 将 sim 文件夹加入环境变量
-addpath('sim');
+% 1. 配置模块化路径
+addpath(genpath('sim'));
 
-% 2. 创建图片保存目录
+fprintf('---------------------------------------------------------\n');
+fprintf('  PMSM-FOC Engineering Benchmark Suite\n');
+fprintf('---------------------------------------------------------\n\n');
+
+% 2. 运行浮点基准模型 (Floating-Point Baseline)
+fprintf('[1/2] Running Floating-Point Reference Model...\n');
+tic;
+try
+    run_floating_foc;
+    t_float = toc;
+    fprintf('  -> Execution Latency: %.4f s\n\n', t_float);
+catch ME
+    warning('Floating-point model execution failed: %s', ME.message);
+    t_float = NaN;
+end
+
+% 3. 运行定点化模型与残差分析 (Fixed-Point & Residual Alignment)
+fprintf('[2/2] Running Fixed-Point (Q-Format) Model & Residual Test...\n');
+tic;
+try
+    test_fixed_residual;
+    t_fixed = toc;
+    fprintf('  -> Execution Latency: %.4f s\n\n', t_fixed);
+catch ME
+    warning('Fixed-point residual test failed: %s', ME.message);
+    t_fixed = NaN;
+end
+
+% 4. 计算与汇总性能指标 (Metrics Extraction)
+fprintf('---------------------------------------------------------\n');
+fprintf(' [Benchmark Results Summary]\n');
+if ~isnan(t_float) && ~isnan(t_fixed)
+    fprintf('   - Floating-Point Exec Time : %.4f s\n', t_float);
+    fprintf('   - Fixed-Point Exec Time    : %.4f s\n', t_fixed);
+    fprintf('   - Execution Speedup        : %.2fx\n', t_float / max(t_fixed, 1e-6));
+end
+
+% 5. 校验并保存结果到 assets 目录
 if ~exist('assets', 'dir')
     mkdir('assets');
 end
 
-fprintf('=========================================\n');
-fprintf(' 正在进行 Day 1 vs Day 30 性能基准测试...\n');
-fprintf('=========================================\n\n');
-
-% 3. 运行 Day 1 (Baseline) 并计时
-fprintf('[1/2] 正在运行 Day 1 基础模型...\n');
-tic;
-DAY1; % 执行 DAY1.m
-t_day1 = toc;
-
-% 4. 运行 Day 30 (Final) 并计时
-fprintf('[2/2] 正在运行 Day 30 最终优化模型...\n');
-tic;
-DAY30; % 执行 DAY30.m
-t_day30 = toc;
-
-% 5. 输出性能对比数据
-fprintf('\n-----------------------------------------\n');
-fprintf('📊 算力耗时对比结果:\n');
-fprintf('  - Day 1  单次运行耗时: %.4f 秒\n', t_day1);
-fprintf('  - Day 30 单次运行耗时: %.4f 秒\n', t_day30);
-if t_day1 > 0
-    fprintf('  - 计算效率提升: %.2f%%\n', ((t_day1 - t_day30) / t_day1) * 100);
+if ishandle(1)
+    saveas(gcf, 'assets/benchmark_residual_comparison.png');
+    fprintf('\n[System] Comparison plot saved to assets/benchmark_residual_comparison.png\n');
 end
-fprintf('-----------------------------------------\n');
-
-% 6. 自动保存当前绘制的图表为 PNG 高清图（供 README 使用）
-saveas(gcf, 'assets/comparison_result.png');
-fprintf('✅ 比较图表已成功保存至 assets/comparison_result.png\n');
+fprintf('---------------------------------------------------------\n');

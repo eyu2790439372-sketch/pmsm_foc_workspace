@@ -25,7 +25,8 @@ An industrial-grade Sensorless Field-Oriented Control (FOC) framework and embedd
 | **SMO Steady-State Angle Error**| **< 0.001 rad** (Type-2 PLL) | $< 0.05\text{ rad}$ | PASS |
 | **ISR Computation Time** | **18.2 µs** @ 10 kHz | $< 50\text{ µs}$ | PASS |
 
-![FOC Dynamic Response Test](assets/foc_waveform.png)
+### Fixed-Point C Engine vs. Floating-Point Residual Alignment
+![Fixed-Point C Engine Unit Test & Residual Alignment](assets/benchmark_residual_comparison.png)
 
 ---
 
@@ -73,11 +74,16 @@ where $\varepsilon$ represents boundary thickness and $K_{\text{smo}}$ denotes o
 ## Directory Structure
 
 ```text
-├── sim/                # Algorithm development & validation scripts
-│   └── DAY30.m         # Top-level verification entry point
-├── src/                # Fixed-point C implementation for C2000
-├── docs/               # Architecture design & math documentation
-├── benchmark.m         # Automated performance profiling suite
+├── sim/                     # Modular simulation & verification scripts
+│   ├── control/             # PID, decoupling & SVPWM algorithms
+│   ├── fixed_point/         # Fixed-point Q-format core implementations
+│   ├── observer/            # SMO & Type-2 PLL modules
+│   ├── plant/               # PMSM electrical & mechanical plant models
+│   └── verification/        # Unit tests & residual alignment suites
+├── src/                     # Fixed-point C implementation for C2000 DSP
+├── docs/                    # Architecture design & math documentation
+├── assets/                  # High-resolution benchmark & waveform plots
+├── benchmark.m              # Top-level performance profiling entry point
 └── README.md
 ```
 
@@ -85,11 +91,14 @@ where $\varepsilon$ represents boundary thickness and $K_{\text{smo}}$ denotes o
 
 ## Quick Start
 
-Run the system benchmark directly in MATLAB:
+Run the complete system benchmark and residual validation directly in MATLAB:
 
 ```matlab
-% Run full control loop verification
-run('sim/DAY30.m')
+% Execute top-level benchmark suite
+run('benchmark.m')
+
+% Or run unit test and fixed-point residual alignment separately
+run('sim/verification/test_fixed_residual.m')
 ```
 
 ---

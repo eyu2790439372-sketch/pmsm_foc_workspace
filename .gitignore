@@ -1,0 +1,27 @@
+# MATLAB & Simulink Binary & Cache Artifacts
+*.slxc
+*.mex*
+slprj/
+*.mat
+*.asv
+*.m~
+*.autosave
+
+# Embedded Compiler & Toolchain Build Outputs (Keil, CCS, GCC)
+build/
+Debug/
+Release/
+*.o
+*.obj
+*.elf
+*.bin
+*.hex
+*.map
+
+# IDE Local Configurations & Metadata
+.vscode/
+.idea/
+.settings/
+*.ccsproject
+*.cproject
+*.project
